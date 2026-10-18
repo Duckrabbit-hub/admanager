@@ -1,0 +1,65 @@
+[
+  {
+    "id": "conv_872ce9c51c",
+    "platform": "facebook",
+    "account_id": null,
+    "account_label": null,
+    "customer_id": "demo_customer_1",
+    "customer_name": "ลูกค้าตัวอย่าง (Facebook)",
+    "platform_conversation_id": null,
+    "messages": [
+      {
+        "id": "598881c836",
+        "from": "customer",
+        "text": "สวัสดีค่ะ เสื้อตัวนี้มีไซส์ L ไหมคะ",
+        "at": "2026-10-18 04:34",
+        "mode": "live"
+      },
+      {
+        "id": "09f714edd6",
+        "from": "page",
+        "text": "สวัสดีค่ะ มีค่ะ รบกวนแจ้งรุ่นที่สนใจได้เลยค่ะ",
+        "at": "2026-10-18 04:39",
+        "mode": "mock",
+        "error": null
+      },
+      {
+        "id": "546032579f",
+        "from": "customer",
+        "text": "รุ่นเสื้อยืดสีขาวค่ะ",
+        "at": "2026-10-18 05:09",
+        "mode": "live"
+      }
+    ],
+    "last_message_at": "2026-10-18 05:14",
+    "unread": false
+  },
+  {
+    "id": "conv_fa4e8a3cb0",
+    "platform": "shopee",
+    "account_id": null,
+    "account_label": null,
+    "customer_id": "demo_customer_2",
+    "customer_name": "ลูกค้าตัวอย่าง (Shopee)",
+    "platform_conversation_id": null,
+    "messages": [
+      {
+        "id": "91c6582e19",
+        "from": "customer",
+        "text": "ของจัดส่งวันไหนคะ",
+        "at": "2026-10-18 01:54",
+        "mode": "mock"
+      },
+      {
+        "id": "6a9c293e7a",
+        "from": "page",
+        "text": "จัดส่งภายใน 1-2 วันทำการค่ะ",
+        "at": "2026-10-18 02:04",
+        "mode": "mock",
+        "error": null
+      }
+    ],
+    "last_message_at": "2026-10-18 02:04",
+    "unread": false
+  }
+]
