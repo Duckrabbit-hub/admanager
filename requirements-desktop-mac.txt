@@ -1,0 +1,7 @@
+# สำหรับเปิดแบบหน้าต่างแอปของตัวเองบน Mac (desktop.py) — ถ้าไม่ติดตั้งไฟล์นี้ desktop.py
+# จะ fallback ไปเปิดด้วยเบราว์เซอร์ปกติให้เองอัตโนมัติ ไม่ error
+-r requirements.txt
+pywebview>=4.4
+pyobjc-core; sys_platform == "darwin"
+pyobjc-framework-Cocoa; sys_platform == "darwin"
+pyobjc-framework-WebKit; sys_platform == "darwin"
