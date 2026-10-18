@@ -18,9 +18,12 @@ import json
 import os
 import uuid
 
+import db
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("DATA_DIR") or os.path.join(BASE_DIR, "data")
 CREDENTIALS_FILE = os.path.join(DATA_DIR, "credentials.json")
+_DB_KEY = "credentials"
 
 PLATFORMS = ["facebook", "tiktok", "shopee"]
 
@@ -53,18 +56,23 @@ def _new_id():
     return "acc_" + uuid.uuid4().hex[:10]
 
 
-def load_accounts():
-    """โหลดไฟล์ credentials แล้วคืนค่าเป็น {platform: [account, ...]} เสมอ
-    migrate รูปแบบเก่า {platform: {field: value}} ให้อัตโนมัติ"""
+def _load_raw():
+    if db.available():
+        return db.get(_DB_KEY, {})
     _ensure_data_dir()
     if not os.path.exists(CREDENTIALS_FILE):
-        return {p: [] for p in PLATFORMS}
-
+        return {}
     try:
         with open(CREDENTIALS_FILE, "r", encoding="utf-8") as f:
-            raw = json.load(f)
+            return json.load(f)
     except (json.JSONDecodeError, OSError):
-        return {p: [] for p in PLATFORMS}
+        return {}
+
+
+def load_accounts():
+    """โหลด credentials แล้วคืนค่าเป็น {platform: [account, ...]} เสมอ
+    migrate รูปแบบเก่า {platform: {field: value}} ให้อัตโนมัติ"""
+    raw = _load_raw()
 
     result = {p: [] for p in PLATFORMS}
     changed = False
@@ -89,6 +97,9 @@ def load_accounts():
 
 
 def save_accounts(accounts):
+    if db.available():
+        db.set(_DB_KEY, accounts)
+        return
     _ensure_data_dir()
     with open(CREDENTIALS_FILE, "w", encoding="utf-8") as f:
         json.dump(accounts, f, ensure_ascii=False, indent=2)

@@ -1,12 +1,18 @@
-"""storage.py — เก็บข้อมูลแคมเปญใน JSON (เรียบง่าย เหมาะกับผู้ใช้คนเดียว/ทีมเล็ก)"""
+"""storage.py — เก็บข้อมูลแคมเปญ
+
+ถ้ามี DATABASE_URL (deploy บนเว็บ) จะเก็บถาวรในฐานข้อมูล Postgres ผ่าน db.py
+ถ้าไม่มี (รันโหมด desktop ในเครื่อง) จะเก็บเป็นไฟล์ JSON ในเครื่องเหมือนเดิม — ดู db.py
+"""
 import json
 import os
 import uuid
 from datetime import datetime
 
+import db
 from config import DATA_DIR
 
 CAMPAIGNS_FILE = os.path.join(DATA_DIR, "campaigns.json")
+_DB_KEY = "campaigns"
 
 
 def _ensure_data_dir():
@@ -14,6 +20,8 @@ def _ensure_data_dir():
 
 
 def load_campaigns():
+    if db.available():
+        return db.get(_DB_KEY, [])
     _ensure_data_dir()
     if not os.path.exists(CAMPAIGNS_FILE):
         return []
@@ -25,6 +33,9 @@ def load_campaigns():
 
 
 def save_campaigns(campaigns):
+    if db.available():
+        db.set(_DB_KEY, campaigns)
+        return
     _ensure_data_dir()
     with open(CAMPAIGNS_FILE, "w", encoding="utf-8") as f:
         json.dump(campaigns, f, ensure_ascii=False, indent=2)

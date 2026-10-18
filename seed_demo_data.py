@@ -9,6 +9,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 
+import db
 import storage
 from inbox import save_conversations, CONVERSATIONS_FILE
 from storage import CAMPAIGNS_FILE
@@ -18,9 +19,17 @@ def _n_days_ago(n):
     return (datetime.now() - timedelta(days=n)).strftime("%Y-%m-%d")
 
 
+def _already_has(db_key, local_file):
+    """เช็คว่ามีข้อมูลอยู่แล้วหรือยัง (ในฐานข้อมูลถ้ามี DATABASE_URL, ไม่งั้นเช็คไฟล์ในเครื่อง)
+    กันไม่ให้ seed ทับข้อมูลจริงของผู้ใช้"""
+    if db.available():
+        return db.exists(db_key)
+    return os.path.exists(local_file)
+
+
 def seed_campaigns():
-    if os.path.exists(CAMPAIGNS_FILE):
-        print("data/campaigns.json มีอยู่แล้ว — ข้าม (ไม่ทับข้อมูลเดิม)")
+    if _already_has("campaigns", CAMPAIGNS_FILE):
+        print("มีข้อมูลแคมเปญอยู่แล้ว — ข้าม (ไม่ทับข้อมูลเดิม)")
         return
     demo = [
         {
@@ -54,8 +63,8 @@ def seed_campaigns():
 
 
 def seed_conversations():
-    if os.path.exists(CONVERSATIONS_FILE):
-        print("data/conversations.json มีอยู่แล้ว — ข้าม (ไม่ทับข้อมูลเดิม)")
+    if _already_has("conversations", CONVERSATIONS_FILE):
+        print("มีข้อมูลบทสนทนาอยู่แล้ว — ข้าม (ไม่ทับข้อมูลเดิม)")
         return
 
     def ts(mins_ago):

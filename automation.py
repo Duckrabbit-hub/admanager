@@ -18,11 +18,14 @@ from datetime import datetime
 
 import analytics
 import config
+import db
 import storage
 from connectors import get_connector
 
 AUTOMATION_FILE = os.path.join(config.DATA_DIR, "automation.json")
 LOG_FILE = os.path.join(config.DATA_DIR, "automation_log.json")
+_CONFIG_DB_KEY = "automation_config"
+_LOG_DB_KEY = "automation_log"
 
 MIN_PEERS_FOR_SCORE = 3
 BOOST_COOLDOWN_HOURS = 12
@@ -46,6 +49,11 @@ def _ensure_data_dir():
 
 
 def load_config():
+    if db.available():
+        cfg = db.get(_CONFIG_DB_KEY, {})
+        merged = dict(DEFAULT_CONFIG)
+        merged.update(cfg)
+        return merged
     _ensure_data_dir()
     if not os.path.exists(AUTOMATION_FILE):
         return dict(DEFAULT_CONFIG)
@@ -60,12 +68,17 @@ def load_config():
 
 
 def save_config(cfg):
+    if db.available():
+        db.set(_CONFIG_DB_KEY, cfg)
+        return
     _ensure_data_dir()
     with open(AUTOMATION_FILE, "w", encoding="utf-8") as f:
         json.dump(cfg, f, ensure_ascii=False, indent=2)
 
 
 def load_log():
+    if db.available():
+        return db.get(_LOG_DB_KEY, [])
     _ensure_data_dir()
     if not os.path.exists(LOG_FILE):
         return []
@@ -80,9 +93,13 @@ def _append_log(entry):
     log = load_log()
     entry["at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     log.append(entry)
+    log = log[-500:]
+    if db.available():
+        db.set(_LOG_DB_KEY, log)
+        return
     _ensure_data_dir()
     with open(LOG_FILE, "w", encoding="utf-8") as f:
-        json.dump(log[-500:], f, ensure_ascii=False, indent=2)
+        json.dump(log, f, ensure_ascii=False, indent=2)
 
 
 def _enriched_active_campaigns():

@@ -14,9 +14,7 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true
-      - key: DATA_DIR
-        value: /var/data
-    disk:
-      name: adshooter-data
-      mountPath: /var/data
-      sizeGB: 1
+      # เก็บข้อมูล (credentials/campaigns/conversations/automation) ถาวรในฐานข้อมูล Postgres (เช่น Supabase)
+      # แทนดิสก์ของ Render (แพลนฟรีไม่มีดิสก์ถาวร) — ต้องตั้งค่านี้ ไม่งั้นข้อมูลหายตอน redeploy/restart
+      - key: DATABASE_URL
+        sync: false

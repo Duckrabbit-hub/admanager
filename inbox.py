@@ -16,16 +16,18 @@ from datetime import datetime
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 import config
+import db
 from messaging import MESSAGING_PLATFORMS, get_messaging_connector
 from messaging.facebook_messenger import verify_signature
 
 CONVERSATIONS_FILE = os.path.join(config.DATA_DIR, "conversations.json")
+_DB_KEY = "conversations"
 
 bp = Blueprint("inbox", __name__)
 
 
 # ---------------------------------------------------------------------------
-# storage
+# storage — ถ้ามี DATABASE_URL เก็บถาวรในฐานข้อมูล ไม่งั้น fallback ไฟล์ JSON ในเครื่อง
 # ---------------------------------------------------------------------------
 
 def _ensure_data_dir():
@@ -33,6 +35,8 @@ def _ensure_data_dir():
 
 
 def load_conversations():
+    if db.available():
+        return db.get(_DB_KEY, [])
     _ensure_data_dir()
     if not os.path.exists(CONVERSATIONS_FILE):
         return []
@@ -44,6 +48,9 @@ def load_conversations():
 
 
 def save_conversations(conversations):
+    if db.available():
+        db.set(_DB_KEY, conversations)
+        return
     _ensure_data_dir()
     with open(CONVERSATIONS_FILE, "w", encoding="utf-8") as f:
         json.dump(conversations, f, ensure_ascii=False, indent=2)

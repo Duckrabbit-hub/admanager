@@ -17,14 +17,16 @@
 1. อัปโหลดโค้ดโปรแกรมขึ้น GitHub repository ของคุณ (ไฟล์ `render.yaml` และ `Procfile` รวมอยู่ในนั้นแล้ว)
 2. เข้า [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint** → เชื่อม repository
    ที่อัปโหลดไว้ → Render จะอ่านค่าจาก `render.yaml` ให้อัตโนมัติ
-3. ตอนตั้งค่า ใส่ค่า environment variables ที่ Render จะถามหา (`ADMIN_USERNAME`, `ADMIN_PASSWORD`) —
-   `SECRET_KEY` ถูกตั้งให้สุ่มอัตโนมัติแล้วจาก `render.yaml`
+3. ตอนตั้งค่า ใส่ค่า environment variables ที่ Render จะถามหา (`ADMIN_USERNAME`, `ADMIN_PASSWORD`,
+   `DATABASE_URL`) — `SECRET_KEY` ถูกตั้งให้สุ่มอัตโนมัติแล้วจาก `render.yaml`
 4. กด **Apply** / **Deploy** รอ build เสร็จ จะได้ URL แบบ `https://adshooter-xxxx.onrender.com`
 5. (ไม่บังคับ) เปิด Shell ของ service นั้นจากหน้า Render แล้วรันครั้งเดียว `python seed_demo_data.py`
    เพื่อสร้างข้อมูลตัวอย่างให้ดูก่อน
 
-ไฟล์ `render.yaml` ตั้งดิสก์ถาวร (`/var/data`) ไว้ให้แล้ว เพื่อไม่ให้ข้อมูลแคมเปญ/แชทหายตอน redeploy —
-ถ้าย้ายไปแพลตฟอร์มอื่นที่ไม่มีดิสก์ถาวร ต้องหาทางเก็บข้อมูลแยก (เช่น เชื่อมฐานข้อมูลภายนอก) เองเพิ่มเติม
+> ⚠️ **สำคัญ**: Render แพลนฟรีไม่มีดิสก์ถาวร ไฟล์ที่เขียนไว้บนเซิร์ฟเวอร์จะหายทุกครั้งที่ redeploy/restart
+> โปรแกรมจึงต้องตั้งค่า `DATABASE_URL` ชี้ไปที่ฐานข้อมูล Postgres ภายนอก (แนะนำ [Supabase](https://supabase.com)
+> ซึ่งมี free tier) ถึงจะเก็บข้อมูลแคมเปญ/credentials/แชทอยู่ถาวรได้จริง — ถ้าไม่ได้ตั้ง `DATABASE_URL` ไว้
+> โปรแกรมจะยังรันได้ตามปกติ แต่ข้อมูลจะเก็บแค่ในไฟล์ของ container ชั่วคราว (หายตอน redeploy)
 
 ## เปิดใช้งานกล่องข้อความเรียลไทม์ (Facebook webhook)
 
