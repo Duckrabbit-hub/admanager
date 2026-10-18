@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}แดชบอร์ด — โปรแกรมยิงแอด{% endblock %}
+{% block content %}
+<h1>แดชบอร์ด</h1>
+
+<div class="stat-row">
+  <div class="stat-tile">
+    <div class="label">ยอดใช้จ่ายรวม</div>
+    <div class="value">฿{{ "{:,.0f}".format(totals.spend) }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Impressions</div>
+    <div class="value">{{ "{:,}".format(totals.impressions) }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Clicks</div>
+    <div class="value">{{ "{:,}".format(totals.clicks) }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Conversions</div>
+    <div class="value">{{ "{:,}".format(totals.conversions) }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="account-block-head">
+    <h2 style="margin:0">แคมเปญทั้งหมด</h2>
+    <div class="badge-row">
+      <a href="{{ url_for('new_campaign') }}" class="btn btn-primary">+ สร้างแคมเปญใหม่</a>
+      <a href="{{ url_for('export_xlsx') }}" class="btn">ส่งออก Excel</a>
+    </div>
+  </div>
+
+  {% if not campaigns %}
+    <div class="empty-state">
+      <div>ยังไม่มีแคมเปญ — เริ่มสร้างแคมเปญแรกของคุณได้เลย</div>
+      <a href="{{ url_for('new_campaign') }}" class="btn btn-primary">+ สร้างแคมเปญใหม่</a>
+    </div>
+  {% else %}
+  <table>
+    <thead>
+      <tr>
+        <th>แคมเปญ</th><th>แพลตฟอร์ม</th><th>บัญชี</th><th>งบ/วัน</th>
+        <th>ยอดใช้จ่าย</th><th>Clicks</th><th>Conversions</th><th>สถานะ</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in campaigns %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td><span class="tag">{{ platform_labels.get(c.platform, c.platform) }}</span></td>
+        <td>{{ c.account_label or "-" }}</td>
+        <td>฿{{ "{:,.0f}".format(c.daily_budget) }}</td>
+        <td>
+          ฿{{ "{:,.0f}".format(c.metrics.spend) }}
+          {% if c.metrics.source == "live" %}
+            <span class="tag tag-live">live</span>
+          {% elif c.metrics.source == "live_failed_fallback_mock" %}
+            <span class="tag tag-warn" title="เรียก API จริงไม่สำเร็จ ขณะนี้แสดงข้อมูลจำลองแทน: {{ c.metrics.source_error }}">⚠ mock</span>
+          {% else %}
+            <span class="tag tag-mock">mock</span>
+          {% endif %}
+        </td>
+        <td>{{ "{:,}".format(c.metrics.clicks) }}</td>
+        <td>{{ "{:,}".format(c.metrics.conversions) }}</td>
+        <td>
+          {% if c.status == "active" %}
+            <span class="tag tag-active">ทำงานอยู่</span>
+          {% else %}
+            <span class="tag tag-paused">{{ "หยุดอัตโนมัติ" if c.auto_paused else "หยุดไว้" }}</span>
+          {% endif %}
+        </td>
+        <td class="badge-row">
+          <form class="inline" method="post" action="{{ url_for('toggle_campaign', campaign_id=c.id) }}">
+            <button type="submit" class="btn btn-sm">{{ "หยุด" if c.status == "active" else "เริ่มใหม่" }}</button>
+          </form>
+          <form class="inline" method="post" action="{{ url_for('delete_campaign', campaign_id=c.id) }}"
+                onsubmit="return confirm('ลบแคมเปญนี้ถาวร?');">
+            <button type="submit" class="btn btn-sm btn-danger">ลบ</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

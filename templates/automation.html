@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}ระบบอัตโนมัติ — โปรแกรมยิงแอด{% endblock %}
+{% block content %}
+<h1>ระบบอัตโนมัติ (Auto-Pilot)</h1>
+<div class="hint-banner">
+  ปิดใช้งานเป็นค่าเริ่มต้นเสมอ เมื่อเปิดแล้วระบบจะตรวจแคมเปญที่ "ทำงานอยู่" เป็นระยะ แล้วหยุดแคมเปญที่ไม่มีประสิทธิภาพ
+  หรือเพิ่มงบให้แคมเปญที่ทำผลงานดี (จะพยายามสั่งที่ตัวแพลตฟอร์มจริงด้วยถ้าเชื่อมต่อไว้แล้ว) — ต้องมีแคมเปญทำงานพร้อมกัน
+  อย่างน้อย {{ min_peers }} แคมเปญ ระบบถึงจะใช้คะแนนเทียบกันตัดสินได้ แคมเปญใหม่จะไม่ถูกแตะจนกว่าจะรันครบจำนวนวันขั้นต่ำ
+  และจะไม่ลบ หรือเปิดแคมเปญที่ถูกหยุดกลับมาเองอัตโนมัติ
+</div>
+
+<form method="post" class="card">
+  <div class="field">
+    <label><input type="checkbox" name="enabled" {{ "checked" if cfg.enabled }}> เปิดใช้งานระบบอัตโนมัติ</label>
+  </div>
+  <div class="form-grid">
+    <div class="field">
+      <label>ความถี่ตรวจสอบ (นาที)</label>
+      <input type="number" name="check_interval_minutes" min="5" value="{{ cfg.check_interval_minutes }}">
+    </div>
+    <div class="field">
+      <label>จำนวนวันขั้นต่ำก่อนให้ระบบแตะแคมเปญ</label>
+      <input type="number" name="min_days_before_action" min="0" value="{{ cfg.min_days_before_action }}">
+    </div>
+    <div class="field">
+      <label>หยุดถ้า CPA สูงกว่า (บาท) — เว้นว่างถ้าไม่ใช้เงื่อนไขนี้</label>
+      <input type="number" name="pause_threshold_cpa" step="0.01" value="{{ cfg.pause_threshold_cpa or '' }}">
+    </div>
+    <div class="field">
+      <label>หยุดถ้า CTR ต่ำกว่า (%) — เว้นว่างถ้าไม่ใช้เงื่อนไขนี้</label>
+      <input type="number" name="min_ctr_percent" step="0.01" value="{{ cfg.min_ctr_percent or '' }}">
+    </div>
+    <div class="field">
+      <label>เพิ่มงบครั้งละ (%)</label>
+      <input type="number" name="boost_percent" step="1" value="{{ cfg.boost_percent }}">
+    </div>
+    <div class="field">
+      <label>เพดานงบสูงสุด (เท่าของงบตั้งต้น)</label>
+      <input type="number" name="boost_budget_cap_multiplier" step="0.1" value="{{ cfg.boost_budget_cap_multiplier }}">
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">บันทึกการตั้งค่า</button>
+</form>
+
+<div class="card">
+  <h2>แคมเปญ &amp; การยกเว้น</h2>
+  {% if not campaigns %}
+  <div class="empty-state">ยังไม่มีแคมเปญ</div>
+  {% else %}
+  <table>
+    <thead><tr><th>แคมเปญ</th><th>แพลตฟอร์ม</th><th>สถานะ</th><th>ยกเว้นจากระบบอัตโนมัติ</th><th></th></tr></thead>
+    <tbody>
+      {% for c in campaigns %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td><span class="tag">{{ platform_labels.get(c.platform, c.platform) }}</span></td>
+        <td>
+          {% if c.status == "active" %}<span class="tag tag-active">ทำงานอยู่</span>
+          {% else %}<span class="tag tag-paused">{{ "หยุดอัตโนมัติ" if c.auto_paused else "หยุดไว้" }}</span>{% endif %}
+        </td>
+        <td>{% if c.automation_excluded %}<span class="tag tag-warn">ยกเว้นอยู่</span>{% else %}<span class="tag">ไม่ยกเว้น</span>{% endif %}</td>
+        <td>
+          <form class="inline" method="post" action="{{ url_for('toggle_exclude', campaign_id=c.id) }}">
+            <button type="submit" class="btn btn-sm">{{ "เลิกยกเว้น" if c.automation_excluded else "ยกเว้นแคมเปญนี้" }}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>ประวัติการทำงานล่าสุด</h2>
+  {% if not log %}
+  <div class="empty-state">ยังไม่มีการทำงานที่บันทึกไว้</div>
+  {% else %}
+  <table>
+    <thead><tr><th>เวลา</th><th>แคมเปญ</th><th>การทำงาน</th><th>เหตุผล</th><th>ผลกับแพลตฟอร์มจริง</th></tr></thead>
+    <tbody>
+      {% for entry in log %}
+      <tr>
+        <td>{{ entry.at }}</td>
+        <td>{{ entry.campaign_name }}</td>
+        <td>
+          {% if entry.action == "pause" %}<span class="tag tag-paused">หยุดแคมเปญ</span>
+          {% else %}<span class="tag tag-active">เพิ่มงบ</span>{% endif %}
+        </td>
+        <td>{{ entry.reason }}</td>
+        <td>
+          {% if entry.live_applied %}<span class="tag tag-live">ทำที่แพลตฟอร์มจริงแล้ว</span>
+          {% else %}<span class="tag tag-mock">เฉพาะในระบบ (ยังไม่เชื่อม/ไม่สำเร็จ)</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}โปรแกรมยิงแอด{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-brand">📣 AdShooter</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint=='dashboard' }}">แดชบอร์ด</a>
+      <a href="{{ url_for('new_campaign') }}" class="{{ 'active' if request.endpoint=='new_campaign' }}">+ สร้างแคมเปญใหม่</a>
+      <a href="{{ url_for('analytics_page') }}" class="{{ 'active' if request.endpoint=='analytics_page' }}">วิเคราะห์ประสิทธิภาพ</a>
+      <a href="{{ url_for('automation_page') }}" class="{{ 'active' if request.endpoint=='automation_page' }}">ระบบอัตโนมัติ</a>
+      <a href="{{ url_for('inbox.inbox_list') }}" class="{{ 'active' if request.endpoint=='inbox.inbox_list' }}">
+        กล่องข้อความ
+        {% if inbox_unread_count %}<span class="tag" style="background:var(--danger-bg);color:var(--danger)">{{ inbox_unread_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('settings') }}" class="{{ 'active' if request.endpoint=='settings' }}">ตั้งค่า API</a>
+    </nav>
+    {% if session.get('logged_in') %}
+    <div class="sidebar-footer">
+      <form method="post" action="{{ url_for('logout') }}">
+        <button type="submit">ออกจากระบบ</button>
+      </form>
+    </div>
+    {% endif %}
+  </aside>
+  <main class="main">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>เข้าสู่ระบบ — โปรแกรมยิงแอด</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <div class="brand">📣 AdShooter</div>
+    <div class="sub">เข้าสู่ระบบเพื่อจัดการแคมเปญและกล่องข้อความ</div>
+    {% if error %}
+      <div class="banner banner-error">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+      <div class="field">
+        <label for="username">ชื่อผู้ใช้</label>
+        <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+      </div>
+      <div class="field">
+        <label for="password">รหัสผ่าน</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
+    </form>
+  </div>
+</body>
+</html>

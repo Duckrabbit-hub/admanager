@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}สร้างแคมเปญใหม่ — โปรแกรมยิงแอด{% endblock %}
+{% block content %}
+<h1>สร้างแคมเปญใหม่</h1>
+
+<form method="post" class="card" id="campaign-form">
+  <div class="field">
+    <label>ชื่อแคมเปญ</label>
+    <input type="text" name="name" placeholder="เช่น โปรโมชั่นสิงหาคม" required>
+  </div>
+
+  <div class="field">
+    <label>แพลตฟอร์ม</label>
+    <div class="radio-row">
+      {% for p, label in platform_labels.items() %}
+      <label class="radio-option">
+        <input type="radio" name="platform" value="{{ p }}" class="platform-radio"
+               {{ "checked" if loop.first }} required>{{ label }}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% for p, accs in accounts_by_platform.items() %}
+  <div class="field account-select-group" data-platform="{{ p }}" {{ "" if loop.first else "hidden" }}>
+    <label>บัญชี{{ platform_labels.get(p, p) }}</label>
+    {% if accs %}
+    <select name="account_id" class="account-select" data-platform="{{ p }}" {{ "" if loop.first else "disabled" }}>
+      {% for a in accs %}
+      <option value="{{ a.id }}">{{ a.label }}{{ "" if account_configured[p][a.id] else " (ยังไม่เชื่อมต่อจริง — จะใช้โหมดจำลอง)" }}</option>
+      {% endfor %}
+    </select>
+    {% else %}
+    <div class="hint">ยังไม่มีบัญชี{{ platform_labels.get(p, p) }} —
+      <a href="{{ url_for('settings') }}">เพิ่มบัญชีในหน้าตั้งค่า</a> หรือสร้างต่อแบบโหมดจำลองได้เลย</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="form-grid">
+    <div class="field">
+      <label>วัตถุประสงค์</label>
+      <select name="objective">
+        {% for k, label in objective_labels.items() %}
+        <option value="{{ k }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>งบประมาณ/วัน (บาท)</label>
+      <input type="number" name="daily_budget" min="1" step="1" value="200" required>
+    </div>
+    <div class="field">
+      <label>วันที่เริ่ม</label>
+      <input type="date" name="start_date" id="start_date">
+    </div>
+    <div class="field field-full">
+      <label>โน้ต (ไม่บังคับ)</label>
+      <textarea name="notes" placeholder="รายละเอียดเพิ่มเติม เช่น กลุ่มเป้าหมาย"></textarea>
+    </div>
+  </div>
+
+  <div class="badge-row">
+    <button type="submit" class="btn btn-primary">สร้างแคมเปญ</button>
+    <a href="{{ url_for('dashboard') }}" class="btn">ยกเลิก</a>
+  </div>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var radios = document.querySelectorAll(".platform-radio");
+  function sync() {
+    var active = document.querySelector(".platform-radio:checked");
+    var platform = active ? active.value : null;
+    document.querySelectorAll(".account-select-group").forEach(function (g) {
+      var on = g.dataset.platform === platform;
+      g.hidden = !on;
+      var sel = g.querySelector(".account-select");
+      if (sel) sel.disabled = !on;
+    });
+  }
+  radios.forEach(function (r) { r.addEventListener("change", sync); });
+  sync();
+
+  var dateInput = document.getElementById("start_date");
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().slice(0, 10);
+  }
+});
+</script>
+{% endblock %}

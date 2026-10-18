@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% set field_labels = {
+  "app_id": "App ID", "app_secret": "App Secret", "access_token": "Access Token",
+  "ad_account_id": "Ad Account ID", "advertiser_id": "Advertiser ID",
+  "page_id": "Page ID", "page_access_token": "Page Access Token",
+  "verify_token": "Verify Token (ตั้งเองได้ ใช้ยืนยันตอนผูก webhook)",
+  "partner_id": "Partner ID", "partner_key": "Partner Key",
+  "shop_id": "Shop ID"
+} %}
+{% block title %}ตั้งค่า API — โปรแกรมยิงแอด{% endblock %}
+{% block content %}
+<h1>ตั้งค่า API</h1>
+<div class="hint-banner">
+  เพิ่มได้หลายบัญชีต่อแพลตฟอร์ม (เช่น หลายเพจ/หลายร้าน) — ถ้ายังไม่กรอกครบ ระบบจะใช้ "โหมดจำลอง"
+  ให้ทดลองใช้งานทุกฟังก์ชันได้ก่อน โดยไม่กระทบเงินจริง
+</div>
+
+{% for platform, accounts in accounts_by_platform.items() %}
+<div class="platform-section">
+  <div class="platform-section-head">
+    <h2 style="margin:0">{{ platform_labels.get(platform, platform) }}</h2>
+    {% set any_ok = account_configured[platform].values() | select | list | length > 0 %}
+    <span class="tag {{ 'tag-live' if any_ok else 'tag-mock' }}">
+      {{ "เชื่อมยิงแอดแล้ว" if any_ok else "โหมดจำลอง (ยังไม่เชื่อม)" }}
+    </span>
+    {% if platform in messaging_fields %}
+      {% set any_msg_ok = messaging_configured.get(platform, {}).values() | select | list | length > 0 %}
+      <span class="tag {{ 'tag-live' if any_msg_ok else 'tag-mock' }}">
+        {{ "เชื่อมกล่องข้อความแล้ว" if any_msg_ok else "กล่องข้อความ: โหมดจำลอง" }}
+      </span>
+    {% endif %}
+  </div>
+
+  {% if platform == "facebook" %}
+  <div class="hint-banner">
+    สำหรับฟีเจอร์กล่องข้อความ (ตอบแชทโดยไม่ต้อง login Facebook ตรง) ต้องกรอก Page ID และ Page Access Token,
+    และนำ URL นี้ไปตั้งเป็น Webhook callback URL ในหน้า Meta App Dashboard (หัวข้อ Messenger → Webhooks)
+    พร้อม Verify Token ที่ตั้งไว้ด้านล่าง — ต้องผ่าน App Review สิทธิ์ <code>pages_messaging</code> ก่อนใช้งานจริงได้
+    <div class="code-box">{{ request.url_root }}webhook/facebook</div>
+  </div>
+  {% endif %}
+
+  {% for acc in accounts %}
+  <div class="account-block">
+    <form method="post">
+      <input type="hidden" name="platform" value="{{ platform }}">
+      <input type="hidden" name="account_id" value="{{ acc.id }}">
+      <div class="account-block-head">
+        <div class="field account-label-field" style="margin:0;flex:1">
+          <input type="text" name="label" value="{{ acc.label }}" placeholder="ชื่อบัญชี/เพจ/ร้าน">
+        </div>
+        <div class="badge-row">
+          <span class="tag {{ 'tag-live' if account_configured[platform][acc.id] else 'tag-mock' }}">
+            {{ "ยิงแอด: เชื่อมแล้ว" if account_configured[platform][acc.id] else "ยิงแอด: จำลอง" }}
+          </span>
+          {% if platform in messaging_fields %}
+          <span class="tag {{ 'tag-live' if messaging_configured[platform][acc.id] else 'tag-mock' }}">
+            {{ "แชท: เชื่อมแล้ว" if messaging_configured[platform][acc.id] else "แชท: จำลอง" }}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="form-grid">
+        {% for f in all_fields.get(platform, []) %}
+        <div class="field">
+          <label>{{ field_labels.get(f, f) }}</label>
+          <input type="{{ 'password' if ('secret' in f or 'token' in f or 'key' in f) else 'text' }}"
+                 name="{{ f }}" value="{{ acc.get(f, '') }}" autocomplete="off">
+        </div>
+        {% endfor %}
+      </div>
+      <div class="badge-row">
+        <button type="submit" class="btn btn-primary btn-sm">บันทึก</button>
+      </div>
+    </form>
+    <form method="post" action="{{ url_for('delete_account_route', platform=platform, account_id=acc.id) }}"
+          onsubmit="return confirm('ลบบัญชีนี้ถาวร?');" style="margin-top:8px">
+      <button type="submit" class="btn btn-sm btn-danger">ลบบัญชีนี้</button>
+    </form>
+  </div>
+  {% endfor %}
+
+  <div class="account-block-new">
+    <h2>+ เพิ่มบัญชี{{ platform_labels.get(platform, platform) }}ใหม่</h2>
+    <form method="post">
+      <input type="hidden" name="platform" value="{{ platform }}">
+      <div class="field">
+        <label>ชื่อบัญชี/เพจ/ร้าน</label>
+        <input type="text" name="label" placeholder="เช่น เพจร้าน A">
+      </div>
+      <div class="form-grid">
+        {% for f in all_fields.get(platform, []) %}
+        <div class="field">
+          <label>{{ field_labels.get(f, f) }}</label>
+          <input type="{{ 'password' if ('secret' in f or 'token' in f or 'key' in f) else 'text' }}"
+                 name="{{ f }}" autocomplete="off">
+        </div>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">เพิ่มบัญชี</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

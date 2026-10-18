@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}กล่องข้อความ — โปรแกรมยิงแอด{% endblock %}
+{% block content %}
+<h1>กล่องข้อความรวม</h1>
+<div class="hint-banner">
+  ข้อความจาก Facebook เข้ามาแบบเรียลไทม์ผ่าน webhook โดยอัตโนมัติ ส่วน Shopee ยังไม่มี webhook ในเวอร์ชันนี้
+  (ดูขั้นตอนเพิ่มเติมได้ในเอกสาร API) — ตอบได้โดยไม่ต้อง login Facebook/Shopee โดยตรง ใช้ Token ที่กรอกไว้ในหน้าตั้งค่า
+</div>
+
+{% if not conversations %}
+<div class="empty-state">
+  <div>ยังไม่มีข้อความเข้ามา — เมื่อมีลูกค้าทักมาที่เพจ/ร้านที่เชื่อมไว้ จะแสดงที่นี่อัตโนมัติ</div>
+  <a href="{{ url_for('settings') }}" class="btn btn-primary">ไปตั้งค่าเชื่อมต่อ</a>
+</div>
+{% else %}
+<div class="inbox-layout">
+  <div class="conv-list">
+    {% for c in conversations %}
+    <a class="conv-item {{ 'active' if selected and c.id == selected.id }}" href="{{ url_for('inbox.inbox_list', conv=c.id) }}">
+      <div class="name">
+        <span>{{ c.customer_name }}</span>
+        {% if c.unread %}<span class="unread-dot"></span>{% endif %}
+      </div>
+      <div class="preview">
+        <span class="tag">{{ platform_labels.get(c.platform, c.platform) }}</span>
+        {% if c.messages %}{{ c.messages[-1].text }}{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="conv-detail">
+    {% if selected %}
+    <div class="conv-detail-head">
+      <strong>{{ selected.customer_name }}</strong>
+      <span class="tag">{{ platform_labels.get(selected.platform, selected.platform) }}</span>
+      {% if selected.account_label %}<span class="tag">{{ selected.account_label }}</span>{% endif %}
+    </div>
+    <div class="conv-messages">
+      {% for m in selected.messages %}
+      <div class="msg-bubble {{ 'msg-customer' if m['from'] == 'customer' else 'msg-page' }}">
+        {{ m.text }}
+        <div class="msg-meta">
+          {{ m.at }}
+          {% if m['from'] == 'page' %}
+            {% if m.mode == 'mock' %}· <span title="โหมดจำลอง ยังไม่ได้เชื่อม API จริง ไม่ถูกส่งถึงลูกค้าจริง">⚠ จำลอง</span>
+            {% elif m.mode == 'live_failed' %}· <span title="ส่งไม่สำเร็จ: {{ m.error }}">⚠ ส่งไม่สำเร็จ</span>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% if not messaging_status.get(selected.id) %}
+    <div class="banner banner-warn" style="margin:0 16px">
+      บัญชีนี้ยังไม่ได้เชื่อมต่อ API จริงสำหรับกล่องข้อความ — การตอบจะเป็นแค่การจำลอง ไม่ถึงลูกค้าจริง
+      ไปที่<a href="{{ url_for('settings') }}">หน้าตั้งค่า</a>เพื่อเชื่อมต่อให้ครบ
+    </div>
+    {% endif %}
+    <form class="conv-reply-form" method="post" action="{{ url_for('inbox.inbox_reply', conv_id=selected.id) }}">
+      <input type="text" name="text" placeholder="พิมพ์ข้อความตอบกลับ..." autocomplete="off" required>
+      <button type="submit" class="btn btn-primary">ส่ง</button>
+    </form>
+    {% else %}
+    <div class="inbox-empty">เลือกการสนทนาทางซ้ายเพื่อดูรายละเอียด</div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

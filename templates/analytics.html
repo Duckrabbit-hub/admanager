@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}วิเคราะห์ประสิทธิภาพ — โปรแกรมยิงแอด{% endblock %}
+{% block content %}
+<h1>วิเคราะห์ประสิทธิภาพ</h1>
+
+{% if not report.has_enough_for_scoring %}
+<div class="banner banner-warn">
+  ต้องมีแคมเปญที่ "ทำงานอยู่" พร้อมกันอย่างน้อย 3 แคมเปญ ระบบจะเริ่มคำนวณคะแนนเทียบกัน (percentile) ให้
+  ตอนนี้ยังมีไม่ครบ จึงยังไม่แสดงคะแนน
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>สรุปรวมตามแพลตฟอร์ม</h2>
+  <table>
+    <thead><tr><th>แพลตฟอร์ม</th><th>ยอดใช้จ่าย</th><th>Impressions</th><th>Clicks</th><th>Conversions</th></tr></thead>
+    <tbody>
+      {% for p, t in report.platform_totals.items() %}
+      <tr>
+        <td><span class="tag">{{ platform_labels.get(p, p) }}</span></td>
+        <td>฿{{ "{:,.0f}".format(t.spend) }}</td>
+        <td>{{ "{:,}".format(t.impressions) }}</td>
+        <td>{{ "{:,}".format(t.clicks) }}</td>
+        <td>{{ "{:,}".format(t.conversions) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if report.top_performers %}
+<div class="card">
+  <h2>แคมเปญที่ทำผลงานดีที่สุด</h2>
+  <table>
+    <thead><tr><th>แคมเปญ</th><th>แพลตฟอร์ม</th><th>คะแนน</th><th>CTR</th><th>CPA</th></tr></thead>
+    <tbody>
+      {% for p in report.top_performers %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td><span class="tag">{{ platform_labels.get(p.platform, p.platform) }}</span></td>
+        <td>
+          <span class="score-pill" style="background:{{ 'var(--ok-bg)' if p.score >= 70 else ('var(--warn-bg)' if p.score >= 40 else 'var(--danger-bg)') }};
+                color:{{ 'var(--ok)' if p.score >= 70 else ('var(--warn)' if p.score >= 40 else 'var(--danger)') }}">
+            {{ "%.0f"|format(p.score) }}/100
+          </span>
+        </td>
+        <td>{{ "%.2f"|format(p.derived.ctr) }}%</td>
+        <td>฿{{ "%.1f"|format(p.derived.cpa) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<h2>รายละเอียดทุกแคมเปญ</h2>
+{% if not report.per_campaign %}
+<div class="empty-state">ยังไม่มีแคมเปญให้วิเคราะห์ — <a href="{{ url_for('new_campaign') }}">สร้างแคมเปญแรก</a></div>
+{% endif %}
+{% for p in report.per_campaign %}
+<div class="card">
+  <div class="account-block-head">
+    <div>
+      <strong>{{ p.name }}</strong>
+      <span class="tag">{{ platform_labels.get(p.platform, p.platform) }}</span>
+      {% if p.account_label %}<span class="tag">{{ p.account_label }}</span>{% endif %}
+      {% if p.metrics.source == "live" %}<span class="tag tag-live">live</span>
+      {% elif p.metrics.source == "live_failed_fallback_mock" %}<span class="tag tag-warn" title="{{ p.metrics.source_error }}">⚠ mock</span>
+      {% else %}<span class="tag tag-mock">mock</span>{% endif %}
+    </div>
+    {% if p.score is not none %}
+    <span class="score-pill" style="background:{{ 'var(--ok-bg)' if p.score >= 70 else ('var(--warn-bg)' if p.score >= 40 else 'var(--danger-bg)') }};
+          color:{{ 'var(--ok)' if p.score >= 70 else ('var(--warn)' if p.score >= 40 else 'var(--danger)') }}">
+      คะแนน {{ "%.0f"|format(p.score) }}/100
+    </span>
+    {% endif %}
+  </div>
+  <div class="stat-row">
+    <div class="stat-tile"><div class="label">ยอดใช้จ่าย</div><div class="value">฿{{ "{:,.0f}".format(p.metrics.spend) }}</div></div>
+    <div class="stat-tile"><div class="label">CTR</div><div class="value">{{ "%.2f"|format(p.derived.ctr) }}%</div></div>
+    <div class="stat-tile"><div class="label">CPC</div><div class="value">฿{{ "%.2f"|format(p.derived.cpc) }}</div></div>
+    <div class="stat-tile"><div class="label">CPA</div><div class="value">฿{{ "%.1f"|format(p.derived.cpa) }}</div></div>
+    <div class="stat-tile"><div class="label">Conversion Rate</div><div class="value">{{ "%.2f"|format(p.derived.conversion_rate) }}%</div></div>
+  </div>
+  {% if p.chart_svg %}{{ p.chart_svg | safe }}{% endif %}
+</div>
+{% endfor %}
+{% endblock %}
