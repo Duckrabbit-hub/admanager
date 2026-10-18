@@ -1,0 +1,291 @@
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --border: #e2e6ee;
+  --text: #1b2433;
+  --text-muted: #6b7484;
+  --accent: #2a4b8d;
+  --accent-soft: #e8edf9;
+  --ok: #1b8a5a;
+  --ok-bg: #e4f6ee;
+  --warn: #9a6400;
+  --warn-bg: #fbf0d9;
+  --danger: #b3261e;
+  --danger-bg: #fbe6e4;
+  --radius: 10px;
+  font-family: "Noto Sans Thai", "IBM Plex Sans Thai", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.sidebar-brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 0 20px 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.sidebar nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+
+.sidebar nav a {
+  color: var(--text);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.sidebar-footer { padding: 14px 20px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+
+.sidebar-footer button {
+  width: 100%;
+  padding: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.main { flex: 1; padding: 28px 36px; max-width: 1180px; }
+
+h1 { font-size: 1.5rem; margin: 0 0 18px; }
+h2 { font-size: 1.1rem; margin: 0 0 12px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  min-width: 150px;
+  flex: 1;
+}
+
+.stat-tile .label { font-size: .8rem; color: var(--text-muted); margin-bottom: 4px; }
+.stat-tile .value { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.badge-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+.tag {
+  display: inline-block;
+  font-size: .72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tag-live { background: var(--ok-bg); color: var(--ok); }
+.tag-mock { background: #eee; color: var(--text-muted); }
+.tag-warn { background: var(--warn-bg); color: var(--warn); cursor: help; }
+.tag-paused { background: var(--danger-bg); color: var(--danger); }
+.tag-active { background: var(--ok-bg); color: var(--ok); }
+
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); }
+th { color: var(--text-muted); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+td { font-variant-numeric: tabular-nums; }
+
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: .9rem;
+}
+
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { opacity: .92; text-decoration: none; }
+.btn-danger { color: var(--danger); border-color: var(--danger-bg); }
+.btn-sm { padding: 5px 10px; font-size: .8rem; }
+
+form.inline { display: inline; }
+
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field[hidden] { display: none; }
+.field label { font-size: .85rem; font-weight: 600; }
+.field input, .field select, .field textarea {
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: .92rem;
+  font-family: inherit;
+}
+.field textarea { resize: vertical; min-height: 70px; }
+.field .hint { font-size: .78rem; color: var(--text-muted); }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.form-grid .field-full { grid-column: 1 / -1; }
+
+.radio-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.radio-option {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.radio-option input { margin-right: 6px; }
+
+.banner {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: .88rem;
+  margin-bottom: 16px;
+}
+.banner-error { background: var(--danger-bg); color: var(--danger); }
+.banner-warn { background: var(--warn-bg); color: var(--warn); }
+.banner-ok { background: var(--ok-bg); color: var(--ok); }
+
+.trend-chart { width: 100%; height: 100px; }
+
+.account-block, .account-block-new {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.account-block-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.account-label-field input { font-weight: 600; }
+
+.platform-section { margin-bottom: 26px; }
+.platform-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+
+/* ---- กล่องข้อความ (Inbox) ---- */
+.inbox-layout { display: flex; gap: 18px; height: calc(100vh - 110px); }
+.conv-list {
+  width: 300px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.conv-item {
+  display: block;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.conv-item:hover { background: var(--accent-soft); text-decoration: none; }
+.conv-item.active { background: var(--accent-soft); }
+.conv-item .name { font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.conv-item .preview { font-size: .82rem; color: var(--text-muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+.conv-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.conv-detail-head { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.conv-messages { flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.msg-bubble { max-width: 70%; padding: 9px 13px; border-radius: 14px; font-size: .9rem; }
+.msg-customer { align-self: flex-start; background: var(--accent-soft); border-bottom-left-radius: 4px; }
+.msg-page { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+.msg-meta { font-size: .7rem; opacity: .75; margin-top: 4px; }
+.conv-reply-form { border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 8px; }
+.conv-reply-form input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 999px; }
+.inbox-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); }
+
+/* ---- หน้า login (ไม่ extend base.html) ---- */
+body.login-page {
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--accent-soft), var(--bg) 60%);
+}
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 30px;
+  box-shadow: 0 10px 30px rgba(20, 30, 60, .08);
+}
+.login-card .brand { font-weight: 700; font-size: 1.2rem; margin-bottom: 4px; text-align: center; }
+.login-card .sub { color: var(--text-muted); font-size: .85rem; text-align: center; margin-bottom: 22px; }
+.login-card button { width: 100%; }
+
+/* ---- score pill (วิเคราะห์ประสิทธิภาพ) ---- */
+.score-pill { font-weight: 700; font-size: .95rem; padding: 3px 11px; border-radius: 999px; }
+
+/* ---- code box (ตั้งค่า API: โชว์ webhook URL) ---- */
+.code-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .8rem;
+  word-break: break-all;
+  margin: 6px 0 2px;
+}
+
+.hint-banner {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: .82rem;
+  margin-bottom: 14px;
+}
+
+.empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+.empty-state .btn { margin-top: 12px; }
+
+@media (max-width: 860px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+  .sidebar nav { flex-direction: row; }
+  .main { padding: 18px; }
+  .inbox-layout { flex-direction: column; height: auto; }
+  .conv-list { width: 100%; max-height: 240px; }
+  .form-grid { grid-template-columns: 1fr; }
+}
