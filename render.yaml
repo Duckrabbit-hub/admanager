@@ -4,7 +4,9 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4
+    # workers ต้องเป็น 1 เท่านั้น ห้ามแก้เพิ่ม — automation.py มี background thread + เก็บข้อมูลเป็นไฟล์ JSON
+    # ถ้ามีหลาย worker process จะมี automation loop วิ่งซ้อนกันหลายชุดและเขียนไฟล์ชนกันได้
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4
     envVars:
       - key: ADMIN_USERNAME
         sync: false

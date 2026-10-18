@@ -38,7 +38,7 @@ Meta App Dashboard ตามขั้นตอนใน [`docs_api_setup_guide.m
 ```bash
 pip install -r requirements.txt
 export ADMIN_USERNAME=admin ADMIN_PASSWORD=รหัสผ่านจริง SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
-gunicorn app:app --bind 0.0.0.0:8000 --workers 2 --threads 4
+gunicorn app:app --bind 0.0.0.0:8000 --workers 1 --threads 4
 ```
 
 แล้วตั้ง reverse proxy (เช่น Nginx/Caddy) ให้มี HTTPS หน้าบ้าน (จำเป็นสำหรับฟีเจอร์กล่องข้อความเรียลไทม์)
